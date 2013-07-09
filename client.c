@@ -6,8 +6,27 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-char message[] = "Hello there!\n";
+char message[] = "README.txt";
 
+int recvfile(int sock)
+{
+  char buf[1024];
+  int num = recv(sock, buf, 256 , 0);
+  printf("%s\n", buf);
+  printf("%d\n", num);
+  FILE *newfile;
+  newfile = fopen("recvfile.txt","w");
+  if (!newfile)
+    return -1;
+  int i = 0;
+  printf("%lu", strlen(buf));
+  while (i < strlen(buf))
+  {
+    putc(buf[i],newfile);
+    i++;
+  }
+  return i;
+}
 
 int main()
 {
@@ -31,7 +50,12 @@ int main()
         exit(2);
     }
     send(sock, message, sizeof(message), 0);
-    recv(sock, buf, 1024, 0);
+//     recv(sock, buf, 1024, 0);
+    if (recvfile(sock) < 0)
+    {
+      perror("recvfile");
+      exit(3);
+    }
     printf("%s", buf);
     close(sock);
     return 0;
