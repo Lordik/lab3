@@ -22,13 +22,17 @@ int sendfile(int sock, const char *file)
     send(sock, buf,14, 0 );
     return -1;
   }
-  fgets(buf, 256, fileread);
-  fclose(fileread);
-  printf("%s\n", buf);
-  if (send(sock, buf, sizeof(buf) ,0) < 0) {
-    perror("send");
-    exit(5);
+  int i;
+  while (!feof(fileread)){
+    for (i = 0; i < 256 || !feof(fileread) ; i++)
+      buf[i] = getc(fileread);
+//     fgets(buf, 256, fileread);
+    if (send(sock, buf, sizeof(buf) ,0) < 0) {
+      perror("send");
+      return -2;
+    }
   }
+  fclose(fileread);
   return 0;
 }
 
@@ -81,34 +85,24 @@ int main()
             exit(3);
         }
 #ifdef THREADS 
-	printf ("1\n");
-	printf ("2\n");
 	if (pthread_create(&thread, NULL, recvandsend, NULL) != 0){
-	  printf ("3\n");
 	  return EXIT_FAILURE;
 	}
-	printf ("4\n");
 #else 
-	printf ("5\n");
 	switch(fork())
 	{
 	  case -1:
-	    printf ("6\n");
 	    perror("fork");
 	    break;
 	  case 0:
-	    printf ("7\n");
 	    close(listener);
 	    recvandsend(sock, buf);
 	    _exit(0);
 	  default:
-	    printf ("8\n");
 	    close(sock);
 	}
 #endif
-	printf("9\n");
     }
-    printf("10\n");
     close(listener);
     return 0;
 }

@@ -10,22 +10,24 @@ char message[] = "README.txt";
 
 int recvfile(int sock)
 {
-  char buf[1024];
-  int num = recv(sock, buf, 256 , 0);
-  printf("%s\n", buf);
-  printf("%d\n", num);
   FILE *newfile;
   newfile = fopen("recvfile.txt","w");
   if (!newfile)
     return -1;
+  char buf[1024];
   int i = 0;
-  printf("%lu", strlen(buf));
-  while (i < strlen(buf))
-  {
-    putc(buf[i],newfile);
-    i++;
+  while (1){
+    int num = recv(sock, buf, 256 , 0);
+    if (strlen(buf) < 1)
+      break;
+    while (i < strlen(buf)){
+      putc(buf[i],newfile);
+      i++;
+    }
+    i = 0;
   }
-  return i;
+  printf("File recived\n");
+  return 0;
 }
 
 int main()
